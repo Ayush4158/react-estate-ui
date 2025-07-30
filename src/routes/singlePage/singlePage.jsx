@@ -1,33 +1,62 @@
 import "./singlePage.scss";
 import Slider from "../../components/slider/Slider";
 import Map from "../../components/map/Map";
-import { singlePostData, userData } from "../../lib/dummydata";
+import { redirect, useLoaderData } from "react-router-dom";
+import { useContext, useState } from "react";
+import {AuthContext} from '../../context/AuthContext'
+import apiRequest from '../../lib/apiRequest'
 
 function SinglePage() {
+  const post = useLoaderData();
+  // console.log(post)
+  const {currentUser} = useContext(AuthContext)
+  const [saved, setSaved] = useState(post.isSaved)
+  const handleSave = async() => {
+    setSaved((prev) => !prev)
+    if(!currentUser){
+      redirect("/login")
+    }
+    try {
+      await apiRequest.post('/user/save', { postId: post.id})
+    } catch (error) {
+      console.log(error)
+    setSaved((prev) => !prev)
+
+    }
+  }
+
+  if (Object.keys(post).length === 0) return <div>Loading...</div>;
+
   return (
     <div className="singlePage">
       <div className="details">
         <div className="wrapper">
-          <Slider images={singlePostData.images} />
+          <Slider images={post?.img || []} />
           <div className="info">
             <div className="top">
               <div className="post">
-                <h1>{singlePostData.title}</h1>
+                <h1>{post.title}</h1>
                 <div className="address">
                   <img src="/pin.png" alt="" />
-                  <span>{singlePostData.address}</span>
+                  <span>{post.address}, {post.city}</span>
                 </div>
-                <div className="price">$ {singlePostData.price}</div>
+                <div className="price">₹ {post.price}</div>
               </div>
               <div className="user">
-                <img src={userData.img} alt="" />
-                <span>{userData.name}</span>
+                <img src={post.user?.avatar} alt="user avatar" />
+                <span>{post.user?.username}</span>
               </div>
             </div>
-            <div className="bottom">{singlePostData.description}</div>
+            <div className="bottom">
+              <p>{post.postDetail?.desc}</p>
+              <p className="createdAt">
+                Posted on: {new Date(post.createdAt).toLocaleDateString()}
+              </p>
+            </div>
           </div>
         </div>
       </div>
+
       <div className="features">
         <div className="wrapper">
           <p className="title">General</p>
@@ -36,75 +65,79 @@ function SinglePage() {
               <img src="/utility.png" alt="" />
               <div className="featureText">
                 <span>Utilities</span>
-                <p>Renter is responsible</p>
+                <p>{post.postDetail?.utilities || "N/A"}</p>
               </div>
             </div>
             <div className="feature">
               <img src="/pet.png" alt="" />
               <div className="featureText">
                 <span>Pet Policy</span>
-                <p>Pets Allowed</p>
+                <p>{post.postDetail?.pet || "N/A"}</p>
               </div>
             </div>
             <div className="feature">
               <img src="/fee.png" alt="" />
               <div className="featureText">
-                <span>Property Fees</span>
-                <p>Must have 3x the rent in total household income</p>
+                <span>Income Requirement</span>
+                <p>{post.postDetail?.income || "N/A"}</p>
               </div>
             </div>
           </div>
+
           <p className="title">Sizes</p>
           <div className="sizes">
             <div className="size">
               <img src="/size.png" alt="" />
-              <span>80 sqft</span>
+              <span>{post.size} sqft</span>
             </div>
             <div className="size">
               <img src="/bed.png" alt="" />
-              <span>2 beds</span>
+              <span>{post.bedroom} beds</span>
             </div>
             <div className="size">
               <img src="/bath.png" alt="" />
-              <span>1 bathroom</span>
+              <span>{post.bathroom} bathrooms</span>
             </div>
           </div>
+
           <p className="title">Nearby Places</p>
           <div className="listHorizontal">
             <div className="feature">
               <img src="/school.png" alt="" />
               <div className="featureText">
                 <span>School</span>
-                <p>250m away</p>
+                <p>{post.postDetail?.school * 100}m away</p>
               </div>
             </div>
             <div className="feature">
-              <img src="/pet.png" alt="" />
+              <img src="/bus.png" alt="" />
               <div className="featureText">
                 <span>Bus Stop</span>
-                <p>100m away</p>
+                <p>{post.postDetail?.bus * 100}m away</p>
               </div>
             </div>
             <div className="feature">
-              <img src="/fee.png" alt="" />
+              <img src="/restaurant.png" alt="" />
               <div className="featureText">
                 <span>Restaurant</span>
-                <p>200m away</p>
+                <p>{post.postDetail?.restaurant * 100}m away</p>
               </div>
             </div>
           </div>
+
           <p className="title">Location</p>
           <div className="mapContainer">
-            <Map items={[singlePostData]} />
+            <Map items={[post]} />
           </div>
+
           <div className="buttons">
             <button>
               <img src="/chat.png" alt="" />
               Send a Message
             </button>
-            <button>
+            <button onClick={handleSave} style={{ backgroundColor: saved ? "#fece51" : "white"}}>
               <img src="/save.png" alt="" />
-              Save the Place
+              { saved ? "Place Saved" :  "Save the Place"}
             </button>
           </div>
         </div>

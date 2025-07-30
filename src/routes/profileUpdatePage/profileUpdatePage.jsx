@@ -1,10 +1,47 @@
+import { useContext, useState } from "react";
 import "./profileUpdatePage.scss";
+import { AuthContext } from "../../context/AuthContext";
+import UploadWidget from "../../components/uploadWidget/UploadWidget";
+import apiRequest from "../../lib/apiRequest"
+import {useNavigate} from "react-router-dom"
+
 
 function ProfileUpdatePage() {
+
+  const [error, setError] = useState("")
+  const {currentUser, updateUser} = useContext(AuthContext)
+  const [avatar, setAvatar] = useState([])
+  const navigate = useNavigate()
+  
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    console.log("inside")
+    const formData = new FormData(e.target);
+    const {username , email, password} = Object.fromEntries(formData);
+
+    try {
+      const res = await apiRequest.put(`/user/${currentUser.id}`, {
+        username,
+        email,
+        password,
+        avatar: avatar[0],
+      })
+
+      if(res.status === 200){
+        updateUser(res.data)
+        navigate('/profile')
+      }
+      // console.log(currentUser)
+    } catch (error) {
+      console.log(error)
+      setError(error.response.data.message)
+    }
+  }
+
   return (
     <div className="profileUpdatePage">
       <div className="formContainer">
-        <form>
+        <form onSubmit={handleSubmit}>
           <h1>Update Profile</h1>
           <div className="item">
             <label htmlFor="username">Username</label>
@@ -12,6 +49,7 @@ function ProfileUpdatePage() {
               id="username"
               name="username"
               type="text"
+              defaultValue={currentUser.username}
             />
           </div>
           <div className="item">
@@ -20,17 +58,26 @@ function ProfileUpdatePage() {
               id="email"
               name="email"
               type="email"
+              defaultValue={currentUser.email}
             />
           </div>
           <div className="item">
             <label htmlFor="password">Password</label>
-            <input id="password" name="password" type="password" />
+            <input id="password" name="password" type="password"  />
+            {error && <span>{error}</span>}
           </div>
           <button>Update</button>
         </form>
       </div>
       <div className="sideContainer">
-        <img src="" alt="" className="avatar" />
+        <img src={avatar[0] || currentUser.avatar || "/noavatar.jpeg"} alt="" className="avatar" />
+        <UploadWidget uwConfig={{
+          cloudName: "dozrhdxrd",
+          uploadPreset:"estate",
+          multiple:false,
+          maxImageFileSize:2000000,
+          folder:"avatar"
+        }} setState={setAvatar} />
       </div>
     </div>
   );

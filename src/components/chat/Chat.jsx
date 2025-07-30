@@ -1,61 +1,38 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import "./chat.scss";
+import { AuthContext } from "../../context/AuthContext";
 
-function Chat() {
-  const [chat, setChat] = useState(true);
+function Chat({chats}) {
+  const [chat, setChat] = useState(false);
+  const {currentUser} = useContext(AuthContext)
+  console.log(chats)
+
+  const handleOpenChat = async (id) => {
+
+  }
   return (
     <div className="chat">
       <div className="messages">
         <h1>Messages</h1>
-        <div className="message">
-          <img
-            src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            alt=""
-          />
-          <span>John Doe</span>
-          <p>Lorem ipsum dolor sit amet...</p>
-        </div>
-        <div className="message">
-          <img
-            src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            alt=""
-          />
-          <span>John Doe</span>
-          <p>Lorem ipsum dolor sit amet...</p>
-        </div>
-        <div className="message">
-          <img
-            src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            alt=""
-          />
-          <span>John Doe</span>
-          <p>Lorem ipsum dolor sit amet...</p>
-        </div>
-        <div className="message">
-          <img
-            src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            alt=""
-          />
-          <span>John Doe</span>
-          <p>Lorem ipsum dolor sit amet...</p>
-        </div>
-        <div className="message">
-          <img
-            src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            alt=""
-          />
-          <span>John Doe</span>
-          <p>Lorem ipsum dolor sit amet...</p>
-        </div>
-        <div className="message">
-          <img
-            src="https://images.pexels.com/photos/91227/pexels-photo-91227.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-            alt=""
-          />
-          <span>John Doe</span>
-          <p>Lorem ipsum dolor sit amet...</p>
-        </div>
+        {
+          chats.length !== 0 ? chats?.map(c => (
+            <div className="message" key={c.id}
+            // style={{
+            //   backgroundColor: c.seenBy.include(currentUser.id) ? "white" : "#fecd514e"
+            // }}
+            onClick={() => handleOpenChat(c.id)}
+            >
+              <img
+                src={c.receiver?.avatar || "/noavatar.jpeg"}
+                alt=""
+              />
+              <span>{c.receiver.username}</span>
+              <p>{c.lastMessage}</p>
+            </div>
+          )): (null) 
+        }
       </div>
+        
       {chat && (
         <div className="chatBox">
           <div className="top">
